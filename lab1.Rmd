@@ -55,22 +55,21 @@ set.seed(3000)
 * *sped_p* = the proportion of students receiving special education services (`sp_ed_fg`) in the analysis and assessment sets for each fold
 
 ```{r, purrr}
-map(data_train_r10$splits,
-       function(fold) {
-         analysis_n     <- nrow(analysis(fold))
-         assessment_n   <- nrow(assessment(fold))
-         analysis_p     <- analysis_n / (analysis_n + assessment_n)
-         assessment_p   <- assessment_n / (analysis_n + assessment_n)
-         temp           <- table(rbind(assessment(fold),
-                                       analysis(fold))$sp_ed_fg)
-         sped_p         <- unname(temp[2] / (temp[1] + temp[2]))
-         cbind(analysis_n,
-               assessment_n,
-               analysis_p,
-               assessment_p,
-               sped_p)
-    })
-
+data_train_r10 <- map_dfr(data_train_r10$splits,
+                          function(fold) {
+                            analysis_n     <- nrow(analysis(fold))
+                            assessment_n   <- nrow(assessment(fold))
+                            analysis_p     <- analysis_n / (analysis_n + assessment_n)
+                            assessment_p   <- assessment_n / (analysis_n + assessment_n)
+                            temp           <- table(rbind(assessment(fold),
+                                                          analysis(fold))$sp_ed_fg)
+                            sped_p         <- unname(temp[2] / (temp[1] + temp[2]))
+                            data.frame(analysis_n,
+                                       assessment_n,
+                                       analysis_p,
+                                       assessment_p,
+                                       sped_p)}) %>%
+  bind_cols(data_train_r10, .)
 ```
 
 ### 5. Please demonstrate that that there are **no** common values in the `id` columns of the `assessment` data between `Fold01` & `Fold02`, and `Fold09` & `Fold10` (of your 10-fold cross-validation object).
