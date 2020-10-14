@@ -61,18 +61,15 @@ map(data_train_r10$splits,
          assessment_n   <- nrow(assessment(fold))
          analysis_p     <- analysis_n / (analysis_n + assessment_n)
          assessment_p   <- assessment_n / (analysis_n + assessment_n)
-         sped_p         <- 
+         temp           <- table(rbind(assessment(fold),
+                                       analysis(fold))$sp_ed_fg)
+         sped_p         <- unname(temp[2] / (temp[1] + temp[2]))
+         cbind(analysis_n,
+               assessment_n,
+               analysis_p,
+               assessment_p,
+               sped_p)
     })
-
-panoply::perble(assessment(data_train_r10$splits[[1]])$sp_ed_fg)
-
-
-sum(assessment(data_train_r10$splits[[1]])$sp_ed_fg == "Y")
-
-sum(na.omit(assessment(data_train_r10$splits[[1]])$sp_ed_fg == "Y"))
-
-rbind(assessment(data_train_r10$splits[[1]]),
-      analysis(data_train_r10$splits[[1]])
 
 ```
 
