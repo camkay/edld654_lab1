@@ -1,8 +1,13 @@
 ---
 title: "EDLD654 - Lab 1"
-author: "Gluck, Kay, & Miller"
+author: "Stephanie Gluck, Cameron Kay, & Ashley Miller"
 date: "10/15/2020"
-output: html_document
+output:
+  html_document:
+    theme: spacelab
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -79,28 +84,40 @@ set.seed(3000)
 #                                        sped_p)}) %>%
 #   bind_cols(data_train_r10, .)
 
+# more effiecient method: 
 data_train_r10 %<>%
   mutate(analysis_n   = map_dbl(splits, ~nrow(analysis(.x))),
          assessment_n = map_dbl(splits, ~nrow(assessment(.x))),
          analysis_p   = analysis_n / (analysis_n + assessment_n),
          assessment_p = assessment_n / (analysis_n + assessment_n),
          sped_p       = map_dbl(splits, ~prop.table(table(.x$data$sp_ed_fg))[["Y"]]))
+
+data_train_r10
+
 ```
 
 ### 5. Please demonstrate that that there are **no** common values in the `id` columns of the `assessment` data between `Fold01` & `Fold02`, and `Fold09` & `Fold10` (of your 10-fold cross-validation object).
 
 ```{r}
-# no overlapping values between the two assessment sets across fold 1 and fold 2
-length(intersect(assessment(data_train_r10$splits[[1]])$id, assessment(data_train_r10$splits[[2]])$id))
+# no overlapping id values between the two assessment sets across fold 1 and fold 2
+length(intersect(assessment(data_train_r10$splits[[1]])$id, 
+                 assessment(data_train_r10$splits[[2]])$id))
 
-# unique ids is equal to all ideas (suggesting no overlapping values) across fold 1 and fold 2
-length(unique(c(assessment(data_train_r10$splits[[1]])$id, assessment(data_train_r10$splits[[2]])$id))) == length(c(assessment(data_train_r10$splits[[1]])$id, assessment(data_train_r10$splits[[2]])$id))
+# unique ids is equal to all ids (suggesting no overlapping values) across fold 1 and fold 2
+length(unique(c(assessment(data_train_r10$splits[[1]])$id, 
+                assessment(data_train_r10$splits[[2]])$id))) ==
+       length(c(assessment(data_train_r10$splits[[1]])$id, 
+                assessment(data_train_r10$splits[[2]])$id))
 
-# no overlapping values between the two assessment sets across fold 9 and fold 10
-length(intersect(assessment(data_train_r10$splits[[9]])$id, assessment(data_train_r10$splits[[10]])$id))
+# no overlapping id values between the two assessment sets across fold 9 and fold 10
+length(intersect(assessment(data_train_r10$splits[[9]])$id, 
+                 assessment(data_train_r10$splits[[10]])$id))
 
-# unique ids is equal to all ideas (suggesting no overlapping values) across fold 9 and fold 10
-length(unique(c(assessment(data_train_r10$splits[[9]])$id, assessment(data_train_r10$splits[[10]])$id))) == length(c(assessment(data_train_r10$splits[[9]])$id, assessment(data_train_r10$splits[[10]])$id))
+# unique ids is equal to all ids (suggesting no overlapping values) across fold 9 and fold 10
+length(unique(c(assessment(data_train_r10$splits[[9]])$id, 
+                assessment(data_train_r10$splits[[10]])$id))) ==
+       length(c(assessment(data_train_r10$splits[[9]])$id, 
+                assessment(data_train_r10$splits[[10]])$id))
 
 ```
 
@@ -109,12 +126,9 @@ length(unique(c(assessment(data_train_r10$splits[[9]])$id, assessment(data_train
 For the following code `vfold_cv(fictional_train, v = 20)`:
 
 * What is the proportion in the analysis set for each fold?
-
-.95
-
+  + .95
 * What is the proportion in the assessment set for each fold?
-
-.05
+  + .05
 
 ### 7. Use Monte Carlo CV to resample the training data with 20 resamples and .30 of each resample reserved for the assessment sets.
 
@@ -129,30 +143,34 @@ data_train_mc <- mc_cv(data_train, prop = .70, times = 20)
 
 ```{r}
 # there are 12838 overlapping values between resample 8 and resample 12
-length(intersect(assessment(data_train_mc$splits[[8]])$id, assessment(data_train_mc$splits[[12]])$id))
+length(intersect(assessment(data_train_mc$splits[[8]])$id, 
+                 assessment(data_train_mc$splits[[12]])$id))
 
 # the number of total cases (85,242) is not equal to the number of unique cases (72,404) across resample 8 and resample 12
-length(c(assessment(data_train_mc$splits[[8]])$id, assessment(data_train_mc$splits[[12]])$id)) == length(unique(c(assessment(data_train_mc$splits[[8]])$id, assessment(data_train_mc$splits[[12]])$id)))
+length(c(assessment(data_train_mc$splits[[8]])$id, 
+         assessment(data_train_mc$splits[[12]])$id)) ==
+length(unique(c(assessment(data_train_mc$splits[[8]])$id, 
+                assessment(data_train_mc$splits[[12]])$id)))
 
 # there are 12764 overlapping values between resample 2 and resample 20
-length(intersect(assessment(data_train_mc$splits[[2]])$id, assessment(data_train_mc$splits[[20]])$id))
+length(intersect(assessment(data_train_mc$splits[[2]])$id, 
+                 assessment(data_train_mc$splits[[20]])$id))
 
 # the number of total cases (85,242) is not equal to the number of unique cases (72,478) across resample 2 and resample 20
-length(c(assessment(data_train_mc$splits[[2]])$id, assessment(data_train_mc$splits[[20]])$id)) == length(unique(c(assessment(data_train_mc$splits[[2]])$id, assessment(data_train_mc$splits[[20]])$id)))
+length(c(assessment(data_train_mc$splits[[2]])$id, 
+         assessment(data_train_mc$splits[[20]])$id)) ==
+length(unique(c(assessment(data_train_mc$splits[[2]])$id, 
+                assessment(data_train_mc$splits[[20]])$id)))
 ```
 
 ### 9. You plan on doing bootstrap resampling with a training set with *n* = 500.
 
 * What is the sample size of an analysis set for a given bootstrap resample?
-
-500
-
+  + 500
 * What is the sample size of an assessment set for a given bootstrap resample?
-
-Approximately `r (1 - .6321) * 500` (`r (1 - .6321) * 100`%) people will be in the assessment set.
-
+  + Approximately `r (1 - .6321) * 500` (`r (1 - .6321) * 100`%) people will be in the assessment set.
 * If each row was selected only once for an analysis set:
-  + what would be the size of the analysis set?
-500
-  + and what would be the size of the assessment set?
-0
+  + What would be the size of the analysis set?
+    + 500
+  + And what would be the size of the assessment set?
+    + 0
