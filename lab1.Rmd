@@ -55,6 +55,15 @@ set.seed(3000)
 * *sped_p* = the proportion of students receiving special education services (`sp_ed_fg`) in the analysis and assessment sets for each fold
 
 ```{r, purrr}
+
+data_train_r10 %>%
+  mutate(analysis_n   = map_dbl(splits, ~nrow(analysis(.x))),
+         assessment_n = map_dbl(splits, ~nrow(assessment(.x))),
+         analysis_p   = analysis_n / (analysis_n + assessment_n),
+         assessment_p = assessment_n / (analysis_n + assessment_n),
+         sped_p       = map_dbl(splits, ~prop.table(table(.x$data$sp_ed_fg))[["Y"]]))
+
+
 data_train_r10 <- map_dfr(data_train_r10$splits,
                           function(fold) {
                             analysis_n     <- nrow(analysis(fold))
